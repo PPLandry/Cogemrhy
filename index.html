@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vos infos pour le déchargement</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f4f6f9;
+      color: #1e293b;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 600px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      color: #0f172a;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid #f1f5f9;
+      word-break: break-word;
+    }
+
+    li:last-child {
+      border-bottom: none;
+    }
+
+    .param-key {
+      font-weight: 600;
+      color: #475569;
+      flex-shrink: 0;
+    }
+
+    .param-value {
+      color: #0f172a;
+      text-align: right;
+    }
+
+    .empty-message {
+      color: #64748b;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="card">
+    <h1>Vos infos pour le déchargement</h1>
+    <ul id="params-list"></ul>
+  </main>
+
+  <script>
+    const paramsList = document.getElementById("params-list");
+
+    function renderEntries(entries) {
+      paramsList.innerHTML = "";
+
+      if (entries.length === 0) {
+        const emptyItem = document.createElement("li");
+        emptyItem.className = "empty-message";
+        emptyItem.textContent = "Aucune information disponible dans l'URL.";
+        paramsList.appendChild(emptyItem);
+        return;
+      }
+
+      for (const [key, value] of entries) {
+        const li = document.createElement("li");
+
+        const keySpan = document.createElement("span");
+        keySpan.className = "param-key";
+        keySpan.textContent = key;
+
+        const valueSpan = document.createElement("span");
+        valueSpan.className = "param-value";
+        valueSpan.textContent = value || "—";
+
+        li.appendChild(keySpan);
+        li.appendChild(valueSpan);
+        paramsList.appendChild(li);
+      }
+    }
+
+    // Use Google Apps Script's API if running inside Apps Script
+    if (typeof google !== "undefined" && google.script && google.script.url) {
+      google.script.url.getLocation(function(location) {
+        const entries = [];
+        for (const [key, values] of Object.entries(location.parameters || {})) {
+          for (const val of values) {
+            entries.push([key, val]);
+          }
+        }
+        renderEntries(entries);
+      });
+    } else {
+      // Standard browser fallback
+      const params = new URLSearchParams(window.location.search);
+      renderEntries(Array.from(params.entries()));
+    }
+  </script>
+
+</body>
+</html>
